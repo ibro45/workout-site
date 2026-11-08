@@ -286,7 +286,7 @@ function disarmClear() {
   clearTimeout(armTimer);
   const b = $("clear");
   b.classList.remove("armed");
-  b.textContent = "Clear ticks";
+  b.textContent = "Reset";
 }
 
 $("tabs").addEventListener("click", e => {
@@ -312,7 +312,7 @@ $("clear").addEventListener("click", e => {
   const b = e.currentTarget;
   if (!b.classList.contains("armed")) {
     b.classList.add("armed");
-    b.textContent = "Confirm clear";
+    b.textContent = "Confirm reset";
     armTimer = setTimeout(disarmClear, 3000);
     return;
   }
