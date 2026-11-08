@@ -101,7 +101,7 @@ button:focus-visible { outline: 2px solid var(--foreground); outline-offset: 2px
 .item.skip .note { color: var(--warning); }
 
 .demo { padding: 2px 14px 14px 50px; }
-.demo img { display: block; width: 100%; max-width: 300px; aspect-ratio: 1; object-fit: contain; border: 1px solid var(--border); border-radius: 8px; background: var(--demo); }
+.demo img, .demo video { display: block; width: 100%; max-width: 300px; aspect-ratio: 1; object-fit: contain; border: 1px solid var(--border); border-radius: 8px; background: var(--demo); }
 .sr { position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); white-space: nowrap; }
 @media (prefers-reduced-motion: reduce) { .chev { transition: none; } }
 </style>
@@ -165,22 +165,22 @@ const SESSIONS = [
     ] },
 ];
 
-// Exercise name → demo in gif/.
+// Exercise name → demo in gif/ (MP4 loops; stills stay images).
 const G = {
-  "Shoulder mobility": "ly-shoulder.webp", "Banded mountain climber": "ly-climber.webp",
-  "Side plank + leg raise": "ly-side-plank.webp", "Bird dog": "ly-bird-dog.webp",
-  "Banded knee drive": "ly-hip-flexion.webp", "Lateral band walk": "ly-band-walk.webp",
-  "Lateral hop-and-stick": "ly-skater.webp", "Dead bug": "ly-dead-bug.webp", "Lying nerve glide": "nerve-glide-lying.webp",
-  "Weighted pull-up": "ly-pull-up.webp", "Standing 1-arm DB press": "ly-press.webp",
-  "DB lateral raise": "ly-lateral-raise.webp", "Weighted dip": "ly-dip.webp", "DB curl": "ly-curl.webp",
-  "Neck flexion, extension, lateral": "neck-3way.webp", "Neck isometrics": "neck.jpg",
-  "Kickstand DB RDL": "kickstand-rdl-b.webp", "Heel-elevated DB squat": "ly-db-squat.webp", "Incline hamstring curl": "ly-leg-curl.webp",
-  "Ring fallout": "ly-fallout.webp", "Suitcase carry": "ly-suitcase.webp",
-  "Band tibialis raise": "tib-band.webp", "Calf raise": "ly-calf.webp",
-  "Dynamic band chop": "ly-band-chop.webp", "DB bench press": "ly-db-bench.webp", "Rope / towel pull-up": "towel-pull-up.webp",
-  "1-arm DB row": "ly-row.webp", "Face pull": "ly-face-pull.webp",
-  "KB swing": "ly-kb-swing.webp", "Bulgarian split squat": "ly-bss.webp", "KB pick-up": "kb-crossover.webp",
-  "Back extension": "ly-back-ext.webp", "Weighted hip flexion": "ly-hip-flexion.webp", "Copenhagen plank": "ly-copenhagen.webp",
+  "Shoulder mobility": "ly-shoulder.mp4", "Banded mountain climber": "ly-climber.mp4",
+  "Side plank + leg raise": "ly-side-plank.mp4", "Bird dog": "ly-bird-dog.mp4",
+  "Banded knee drive": "ly-hip-flexion.mp4", "Lateral band walk": "ly-band-walk.mp4",
+  "Lateral hop-and-stick": "ly-skater.mp4", "Dead bug": "ly-dead-bug.mp4", "Lying nerve glide": "nerve-glide-lying.mp4",
+  "Weighted pull-up": "ly-pull-up.mp4", "Standing 1-arm DB press": "ly-press.mp4",
+  "DB lateral raise": "ly-lateral-raise.mp4", "Weighted dip": "ly-dip.mp4", "DB curl": "ly-curl.mp4",
+  "Neck flexion, extension, lateral": "neck-3way.mp4", "Neck isometrics": "neck.jpg",
+  "Kickstand DB RDL": "kickstand-rdl-b.mp4", "Heel-elevated DB squat": "ly-db-squat.mp4", "Incline hamstring curl": "ly-leg-curl.mp4",
+  "Ring fallout": "ly-fallout.mp4", "Suitcase carry": "ly-suitcase.mp4",
+  "Band tibialis raise": "tib-band.mp4", "Calf raise": "ly-calf.mp4",
+  "Dynamic band chop": "ly-band-chop.mp4", "DB bench press": "ly-db-bench.mp4", "Rope / towel pull-up": "towel-pull-up.mp4",
+  "1-arm DB row": "ly-row.mp4", "Face pull": "ly-face-pull.mp4",
+  "KB swing": "ly-kb-swing.mp4", "Bulgarian split squat": "ly-bss.mp4", "KB pick-up": "kb-crossover.mp4",
+  "Back extension": "ly-back-ext.mp4", "Weighted hip flexion": "ly-hip-flexion.mp4", "Copenhagen plank": "ly-copenhagen.webp",
 };
 
 const store = {
@@ -271,10 +271,20 @@ function toggleDemo(btn) {
   const item = btn.closest(".item");
   const panel = document.createElement("div");
   panel.className = "demo";
-  const img = document.createElement("img");
-  img.src = `gif/${btn.dataset.gif}`;
-  img.alt = `${btn.dataset.name} demo`;
-  panel.append(img);
+  const file = btn.dataset.gif;
+  let media;
+  if (file.endsWith(".mp4")) {
+    // Muted, inline, looping video: far smaller than an animated image.
+    media = document.createElement("video");
+    media.muted = true; media.loop = true; media.autoplay = true; media.playsInline = true;
+    media.setAttribute("muted", ""); media.setAttribute("playsinline", "");
+    media.setAttribute("aria-label", `${btn.dataset.name} demo`);
+  } else {
+    media = document.createElement("img");
+    media.alt = `${btn.dataset.name} demo`;
+  }
+  media.src = `gif/${file}`;
+  panel.append(media);
   item.append(panel);
   item.classList.add("open");
   btn.setAttribute("aria-expanded", "true");
