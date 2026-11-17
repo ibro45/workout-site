@@ -139,7 +139,7 @@ sessions:
         sets: 3
         reps: 5-8
         unit: per side
-        cue: Straps (test edit)
+        cue: Straps
         demo: ly-row.mp4
       - name: Face pull
         sets: 2-3
