@@ -11,12 +11,39 @@ heading: Strength program
 
 # Exercises used in more than one session. List them by name below.
 shared:
-  Banded mountain climber: { sets: 2, reps: 6, unit: per side, demo: ly-climber.mp4 }
-  Side plank + leg raise:  { sets: 2, reps: 6-8, unit: per side, cue: On forearm, demo: ly-side-plank.mp4 }
-  Bird dog:                { sets: 2, reps: 6, unit: per side, cue: 5 s hold, demo: ly-bird-dog.mp4 }
-  Banded knee drive:       { sets: 2, reps: 8, unit: per side, demo: ly-hip-flexion.mp4 }
-  Lateral band walk:       { sets: 2, reps: 10, unit: each way, cue: Band above knees, demo: ly-band-walk.mp4 }
-  Lying nerve glide:       { sets: 2, reps: 10-15, cue: Right leg, demo: nerve-glide-lying.mp4 }
+  Banded mountain climber:
+    sets: 2
+    reps: 6
+    unit: per side
+    demo: ly-climber.mp4
+  Side plank + leg raise:
+    sets: 2
+    reps: 6-8
+    unit: per side
+    cue: On forearm
+    demo: ly-side-plank.mp4
+  Bird dog:
+    sets: 2
+    reps: 6
+    unit: per side
+    cue: 5 s hold
+    demo: ly-bird-dog.mp4
+  Banded knee drive:
+    sets: 2
+    reps: 8
+    unit: per side
+    demo: ly-hip-flexion.mp4
+  Lateral band walk:
+    sets: 2
+    reps: 10
+    unit: each way
+    cue: Band above knees
+    demo: ly-band-walk.mp4
+  Lying nerve glide:
+    sets: 2
+    reps: 10-15
+    cue: Right leg
+    demo: nerve-glide-lying.mp4
 
 sessions:
   Upper 1:
