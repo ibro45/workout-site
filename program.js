@@ -75,7 +75,7 @@
           if (r.skip === true || /^(true|yes)$/i.test(String(r.skip))) skip = true;
           else if (r.skip !== undefined && r.skip !== null && r.skip !== false) warnings.push(`${where}: skip must be true or false`);
           let demo = text(r.demo, where, "demo");
-          if (demo && !DEMO.test(demo)) { warnings.push(`${where}: demo "${demo}" isn't a file name in gif/`); demo = ""; }
+          if (demo && !DEMO.test(demo)) { warnings.push(`${where}: demo "${demo}" isn't a file name in demos/`); demo = ""; }
           seen[name] = (seen[name] || 0) + 1;
           rows.push({
             key: seen[name] > 1 ? `${name}#${seen[name]}` : name, name,

@@ -2,7 +2,7 @@
 # Everything in this file is public.
 #
 # Each exercise:  name (required), reps or time (one required), sets, unit,
-#                 cue, demo (file in gif/), superset (a letter on two rows next
+#                 cue, demo (file in demos/), superset (a letter on two rows next
 #                 to each other), skip (true = dimmed, not counted).
 # Type plain hyphens: "3-4" shows as "3–4".
 
