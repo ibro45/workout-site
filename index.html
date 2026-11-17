@@ -42,6 +42,7 @@ img{max-width:100%}
   color-scheme: dark;
 }
 * { box-sizing: border-box; }
+[hidden] { display: none !important; }
 body {
   background: var(--background); color: var(--foreground); font: 400 15px/1.4 var(--sans);
   padding-left: max(16px, env(safe-area-inset-left, 0px));
@@ -58,7 +59,7 @@ button:focus-visible { outline: 2px solid var(--foreground); outline-offset: 2px
 
 /* Tabs: each carries a thin bar for how much of that session is ticked. */
 .tabs-shell { position: sticky; top: env(safe-area-inset-top, 0px); z-index: 5; padding-block: 4px; background: var(--background); }
-.tabs { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 2px; padding: 3px; border-radius: 8px; background: var(--muted); }
+.tabs { display: grid; grid-auto-flow: column; grid-auto-columns: minmax(0, 1fr); gap: 2px; padding: 3px; border-radius: 8px; background: var(--muted); }
 .tab { display: grid; gap: 5px; padding: 7px 4px 5px; border-radius: 6px; color: var(--muted-foreground); font-size: .875rem; font-weight: 500; text-align: center; white-space: nowrap; }
 .tab[aria-selected="true"] { background: var(--background); color: var(--foreground); box-shadow: 0 1px 2px rgb(0 0 0 / .08); }
 .bar { display: block; height: 2px; margin-inline: 6px; border-radius: 1px; background: var(--input); overflow: hidden; }
@@ -102,155 +103,135 @@ button:focus-visible { outline: 2px solid var(--foreground); outline-offset: 2px
 
 .demo { padding: 2px 14px 14px 50px; }
 .demo img, .demo video { display: block; width: 100%; max-width: 300px; aspect-ratio: 1; object-fit: contain; border: 1px solid var(--border); border-radius: 8px; background: var(--demo); }
+.desc { margin: -4px 0 0; font-size: .875rem; color: var(--muted-foreground); }
+.card.err { display: grid; gap: 6px; padding: 12px 14px; border: 1px solid var(--destructive); border-radius: 12px; font-size: .875rem; }
+.card.err > b { color: var(--destructive); font-weight: 600; }
+.card.err.warn { border-color: var(--warning); }
+.card.err.warn > b { color: var(--warning); }
+.card.err pre { margin: 0; font: 400 .8125rem/1.45 ui-monospace, SFMono-Regular, Menlo, monospace; white-space: pre-wrap; overflow-wrap: anywhere; }
+.card.err small { color: var(--muted-foreground); }
 .sr { position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); white-space: nowrap; }
 @media (prefers-reduced-motion: reduce) { .chev { transition: none; } }
 </style>
 
 <div class="wrap">
-  <div class="head"><h1>Strength program</h1><button class="clear" id="clear" type="button"></button></div>
-  <div class="tabs-shell"><div class="tabs" id="tabs" role="tablist" aria-label="Sessions"></div></div>
+  <div class="head"><h1 id="heading">Strength program</h1><button class="clear" id="clear" type="button">Reset</button></div>
+  <p class="desc" id="desc" hidden></p>
+  <div class="card err" id="err" hidden></div>
+  <div class="tabs-shell" id="tabs-shell" hidden><div class="tabs" id="tabs" role="tablist" aria-label="Sessions"></div></div>
   <div id="list"></div>
 </div>
 
+<script src="https://cdnjs.cloudflare.com/ajax/libs/js-yaml/4.1.0/js-yaml.min.js"></script>
+<script src="program.js"></script>
 <script>
-// Row: [name, dose, note, pair, skip]
-const climber = ["Banded mountain climber", "2×6/side"];
-const sidePlank = ["Side plank + leg raise", "2×6–8/side", "On forearm"];
-const birdDog = ["Bird dog", "2×6/side", "5 s hold"];
-const kneeDrive = ["Banded knee drive", "2×8/side"];
-const bandWalk = ["Lateral band walk", "2×10 each way", "Band above knees"];
-const slump = ["Lying nerve glide", "2×10–15", "Right leg"];
-
-const SESSIONS = [
-  { label: "Upper 1",
-    warm: [["Shoulder mobility", "5 min", "Pass-throughs, pull-aparts, wall slides"], climber, sidePlank, birdDog],
-    main: [
-      ["Weighted pull-up", "3–4×3–6", "", "A1"],
-      ["Standing 1-arm DB press", "3×4–6/side", "No sideways lean", "A2"],
-      ["Weighted dip", "3×5–8", "", "B1"],
-      ["DB curl", "3×8–10", "", "B2"],
-      ["DB lateral raise", "3×10–15"],
-      ["Neck flexion, extension, lateral", "2×10–15 each", "Light plate, slow"],
-    ] },
-  { label: "Lower 1",
-    warm: [kneeDrive, bandWalk, ["Lateral hop-and-stick", "2×3/side", "Small, quiet landing"], slump],
-    main: [
-      ["Kickstand DB RDL", "3×6–8/leg", "3 s down, stop before nerve symptoms"],
-      ["Heel-elevated DB squat", "3×6–8", "Heels on wedge, 3 s down"],
-      ["Incline hamstring curl", "3×8–12", "EZ Boot"],
-      ["Ring fallout", "2×6–8", "Later: ab-wheel rollout 3×6–10"],
-      ["Suitcase carry", "2×30–40 s/side"],
-      ["Band tibialis raise", "2×15–20", "Seated, knees bent", "A1"],
-      ["Calf raise", "3×10–15", "Toes on wedge", "A2"],
-    ] },
-  { label: "Upper 2",
-    warm: [climber, sidePlank, birdDog],
-    main: [
-      ["Dynamic band chop", "2×4–6/side", "Fast, controlled"],
-      ["DB bench press", "3×5–6", "", "A1"],
-      ["Rope / towel pull-up", "3×5–8", "", "A2"],
-      ["1-arm DB row", "3×5–8/side", "Straps"],
-      ["Face pull", "2–3×12–20"],
-      ["Neck isometrics", "3×20 s each way"],
-    ] },
-  { label: "Lower 2",
-    warm: [kneeDrive, bandWalk, ["Dead bug", "2×6/side"], slump],
-    main: [
-      ["KB swing", "3×5–6", "Skip until back healed", "", true],
-      ["Bulgarian split squat", "3×5–8/leg"],
-      ["Back extension", "2×10–15", "Top half of the range at first, soft knees, stop at a straight line"],
-      ["Weighted hip flexion", "2×8–12/leg", "EZ Boot, knee bent"],
-      ["Copenhagen plank", "2×20–30 s/side"],
-      ["KB pick-up", "2–3×60 s", "Last. Nonstop, alternate sides; stop if form slips"],
-    ] },
-];
-
-// Exercise name → demo in gif/ (MP4 loops; stills stay images).
-const G = {
-  "Shoulder mobility": "ly-shoulder.mp4", "Banded mountain climber": "ly-climber.mp4",
-  "Side plank + leg raise": "ly-side-plank.mp4", "Bird dog": "ly-bird-dog.mp4",
-  "Banded knee drive": "ly-hip-flexion.mp4", "Lateral band walk": "ly-band-walk.mp4",
-  "Lateral hop-and-stick": "ly-skater.mp4", "Dead bug": "ly-dead-bug.mp4", "Lying nerve glide": "nerve-glide-lying.mp4",
-  "Weighted pull-up": "ly-pull-up.mp4", "Standing 1-arm DB press": "ly-press.mp4",
-  "DB lateral raise": "ly-lateral-raise.mp4", "Weighted dip": "ly-dip.mp4", "DB curl": "ly-curl.mp4",
-  "Neck flexion, extension, lateral": "neck-3way.mp4", "Neck isometrics": "neck.jpg",
-  "Kickstand DB RDL": "kickstand-rdl-b.mp4", "Heel-elevated DB squat": "ly-db-squat.mp4", "Incline hamstring curl": "ly-leg-curl.mp4",
-  "Ring fallout": "ly-fallout.mp4", "Suitcase carry": "ly-suitcase.mp4",
-  "Band tibialis raise": "tib-band.mp4", "Calf raise": "ly-calf.mp4",
-  "Dynamic band chop": "ly-band-chop.mp4", "DB bench press": "ly-db-bench.mp4", "Rope / towel pull-up": "towel-pull-up.mp4",
-  "1-arm DB row": "ly-row.mp4", "Face pull": "ly-face-pull.mp4",
-  "KB swing": "ly-kb-swing.mp4", "Bulgarian split squat": "ly-bss.mp4", "KB pick-up": "kb-crossover.mp4",
-  "Back extension": "ly-back-ext.mp4", "Weighted hip flexion": "ly-hip-flexion.mp4", "Copenhagen plank": "ly-copenhagen.webp",
-};
-
+// The program comes from program.yaml (see program.js). The last version that
+// loaded is kept so a typo or no signal never leaves the page blank.
 const store = {
   get(k) { try { return JSON.parse(localStorage.getItem(k)); } catch { return null; } },
   set(k, v) { try { localStorage.setItem(k, JSON.stringify(v)); } catch {} },
+  drop(k) { try { localStorage.removeItem(k); } catch {} },
 };
 const esc = s => String(s).replace(/[&<>"]/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" })[c]);
 const $ = id => document.getElementById(id);
 const chevron = '<svg class="chev" viewBox="0 0 14 14" aria-hidden="true"><path d="M2 5l5 5 5-5" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>';
 
-let tab = store.get("hrs-tab3") || 0;
-if (!SESSIONS[tab]) tab = 0;
-const ticks = store.get("hrs-ticks3") || {};
-let openKey = null;
+let program = null;          // normalised program being shown
+let tab = 0;                 // index of the current session
+let ticks = store.get("hrs-ticks4") || {};   // { session name: { exercise key: true } }
+let openKey = null;          // "<section>:<row>" of the open demo
 
-// "3×6–8/leg" → ["3×6–8", "per leg"], "2×10 each way" → ["2×10", "each way"]
-function splitDose(dose) {
-  const m = dose.match(/^(.*?)(\/\w+| each way| each)$/);
-  return m ? [m[1].trim(), m[2].trim().replace("/", "per ")] : [dose, ""];
-}
+const session = () => program.sessions[tab];
+const sessionTicks = () => ticks[session().name] || {};
+const counted = sec => sec.rows.filter(r => !r.skip);
+const tally = rows => { const t = sessionTicks(); return [rows.filter(r => t[r.key]).length, rows.length]; };
+const saveTicks = () => store.set("hrs-ticks4", ticks);
 
-// Rows that can be ticked, with their storage keys. Skipped rows don't count.
-function rowsOf(i, part) {
-  const prefix = part === "warm" ? `${i}-w` : `${i}-`;
-  return SESSIONS[i][part].map((r, n) => ({ key: prefix + n, skip: r[4] })).filter(r => !r.skip);
-}
-function tally(rows) { return [rows.filter(r => ticks[r.key]).length, rows.length]; }
-
-function rowHtml(key, [name, dose, note, pair, skip]) {
-  const done = !skip && !!ticks[key];
-  const [amount, unit] = splitDose(dose);
-  const link = pair ? (pair.endsWith("1") ? " p1" : " p2") : "";
-  const tick = skip
+function rowHtml(r, id) {
+  const done = !r.skip && !!sessionTicks()[r.key];
+  const link = r.pair ? (r.pair.endsWith("1") ? " p1" : " p2") : "";
+  const tick = r.skip
     ? `<span class="tick" aria-hidden="true"><span class="dash">–</span></span>`
-    : `<label class="tick"><input id="t-${key}" type="checkbox" data-key="${key}"${done ? " checked" : ""}><span class="box" aria-hidden="true"></span><span class="sr">Done: ${esc(name)}</span></label>`;
-  return `<div class="item${link}${skip ? " skip" : ""}" data-item="${key}"><div class="row${done ? " done" : ""}">${tick}` +
-    `<button class="info" type="button" data-open="${key}" data-gif="${esc(G[name] || "")}" data-name="${esc(name)}" aria-expanded="false">` +
-    `<span class="txt"><span class="name">${pair ? `<span class="chip">${pair}</span>` : ""}${esc(name)}</span>${note ? `<span class="note">${esc(note)}</span>` : ""}</span>` +
-    `<span class="dose"><b>${esc(amount)}</b>${unit ? `<small>${esc(unit)}</small>` : ""}</span>${chevron}<span class="sr">Show demo</span></button></div></div>`;
+    : `<label class="tick"><input type="checkbox" data-tick="${id}"${done ? " checked" : ""}><span class="box" aria-hidden="true"></span><span class="sr">Done: ${esc(r.name)}</span></label>`;
+  return `<div class="item${link}${r.skip ? " skip" : ""}" data-item="${id}"><div class="row${done ? " done" : ""}">${tick}` +
+    `<button class="info" type="button" data-open="${id}" aria-expanded="false">` +
+    `<span class="txt"><span class="name">${r.pair ? `<span class="chip">${esc(r.pair)}</span>` : ""}${esc(r.name)}</span>${r.cue ? `<span class="note">${esc(r.cue)}</span>` : ""}</span>` +
+    `<span class="dose"><b>${esc(r.amount)}</b>${r.unit ? `<small>${esc(r.unit)}</small>` : ""}</span>${chevron}<span class="sr">Show demo</span></button></div></div>`;
 }
 
-function groupHtml(title, part) {
-  const s = SESSIONS[tab];
-  const prefix = part === "warm" ? `${tab}-w` : `${tab}-`;
-  return `<section class="pane" data-pane="${part}"><div class="pane-h"><span>${title}</span><span class="count" data-count="${part}"></span></div>` +
-    s[part].map((r, n) => rowHtml(prefix + n, r)).join("") + `</section>`;
-}
+const rowAt = id => { const [s, r] = id.split(":").map(Number); return session().sections[s].rows[r]; };
 
 function renderTabs() {
-  $("tabs").innerHTML = SESSIONS.map((s, i) => {
-    const [d, n] = tally([...rowsOf(i, "warm"), ...rowsOf(i, "main")]);
-    return `<button class="tab" type="button" role="tab" data-i="${i}" aria-selected="${i === tab}" aria-label="${s.label}, ${d} of ${n} done">${s.label}<span class="bar"><span style="width:${n ? d / n * 100 : 0}%"></span></span></button>`;
+  $("tabs").innerHTML = program.sessions.map((s, i) => {
+    const t = ticks[s.name] || {};
+    const rows = s.sections.flatMap(counted), d = rows.filter(r => t[r.key]).length, n = rows.length;
+    return `<button class="tab" type="button" role="tab" data-i="${i}" aria-selected="${i === tab}" aria-label="${esc(s.name)}, ${d} of ${n} done">${esc(s.name)}<span class="bar"><span style="width:${n ? d / n * 100 : 0}%"></span></span></button>`;
   }).join("");
 }
 
 function refreshProgress() {
   renderTabs();
-  for (const part of ["warm", "main"]) {
-    const [d, n] = tally(rowsOf(tab, part));
-    const el = document.querySelector(`[data-count="${part}"]`);
+  session().sections.forEach((sec, s) => {
+    const [d, n] = tally(counted(sec));
+    const el = document.querySelector(`[data-count="${s}"]`);
     if (el) el.textContent = `${d}/${n}`;
-  }
+  });
 }
 
 function renderSession() {
   openKey = null;
-  $("list").innerHTML = groupHtml("Warm-up", "warm") + groupHtml("Workout", "main");
+  $("list").innerHTML = session().sections.map((sec, s) =>
+    `<section class="pane"><div class="pane-h"><span>${esc(sec.name)}</span><span class="count" data-count="${s}"></span></div>` +
+    sec.rows.map((r, i) => rowHtml(r, `${s}:${i}`)).join("") + `</section>`).join("");
   disarmClear();
   refreshProgress();
-  store.set("hrs-tab3", tab);
+  store.set("hrs-tab4", session().name);
+}
+
+function show(p) {
+  program = p;
+  $("tabs-shell").hidden = false;
+  document.title = p.title;
+  $("heading").textContent = p.heading;
+  $("desc").textContent = p.description;
+  $("desc").hidden = !p.description;
+  const want = store.get("hrs-tab4");
+  tab = Math.max(0, p.sessions.findIndex(s => s.name === want));
+  renderSession();
+}
+
+function showProblems(errors, warnings) {
+  const box = $("err"), list = [...errors, ...warnings];
+  box.hidden = !list.length;
+  if (!list.length) return;
+  box.classList.toggle("warn", !errors.length);
+  box.innerHTML = `<b>${errors.length ? "Can't read program.yaml" : "Check program.yaml"}</b>` +
+    `<pre>${esc(list.join("\n"))}</pre>` +
+    (errors.length && program ? `<small>Showing the last version that worked</small>` : "");
+}
+
+async function load() {
+  const cached = store.get("hrs-program4");
+  // A saved copy from an older version could be unreadable: forget it and carry on.
+  if (cached) try { show(cached); } catch { program = null; store.drop("hrs-program4"); $("tabs-shell").hidden = true; }
+  let result;
+  try {
+    if (!window.jsyaml) throw new Error("the YAML reader didn't load (no connection?)");
+    const res = await fetch("program.yaml", { cache: "no-cache" });
+    if (!res.ok) throw new Error(`HTTP ${res.status}`);
+    result = Program.parse(await res.text(), jsyaml);
+  } catch (e) {
+    result = { program: null, errors: [`Couldn't load program.yaml: ${e.message}`], warnings: [] };
+  }
+  if (result.program) {
+    // One-time move of old position-based ticks to name-based ones.
+    const old = store.get("hrs-ticks3");
+    if (old && !store.get("hrs-ticks4")) { ticks = Program.migrateTicks(old, result.program); saveTicks(); }
+    store.drop("hrs-ticks3"); store.drop("hrs-tab3");
+    store.set("hrs-program4", result.program);
+    show(result.program);
+  }
+  showProblems(result.errors, result.warnings);
 }
 
 function closeDemo() {
@@ -265,25 +246,24 @@ function closeDemo() {
 }
 
 function toggleDemo(btn) {
-  const key = btn.dataset.open, wasOpen = key === openKey;
+  const key = btn.dataset.open, wasOpen = key === openKey, r = rowAt(key);
   closeDemo();
-  if (wasOpen || !btn.dataset.gif) return;
+  if (wasOpen || !r.demo) return;
   const item = btn.closest(".item");
   const panel = document.createElement("div");
   panel.className = "demo";
-  const file = btn.dataset.gif;
   let media;
-  if (file.endsWith(".mp4")) {
+  if (r.demo.endsWith(".mp4")) {
     // Muted, inline, looping video: far smaller than an animated image.
     media = document.createElement("video");
     media.muted = true; media.loop = true; media.autoplay = true; media.playsInline = true;
     media.setAttribute("muted", ""); media.setAttribute("playsinline", "");
-    media.setAttribute("aria-label", `${btn.dataset.name} demo`);
+    media.setAttribute("aria-label", `${r.name} demo`);
   } else {
     media = document.createElement("img");
-    media.alt = `${btn.dataset.name} demo`;
+    media.alt = `${r.name} demo`;
   }
-  media.src = `gif/${file}`;
+  media.src = `gif/${r.demo}`;
   panel.append(media);
   item.append(panel);
   item.classList.add("open");
@@ -315,26 +295,28 @@ $("list").addEventListener("click", e => {
   if (b) toggleDemo(b);
 });
 $("list").addEventListener("change", e => {
-  const cb = e.target, key = cb.dataset.key;
-  ticks[key] = cb.checked;
+  const cb = e.target, id = cb.dataset.tick, r = rowAt(id), name = session().name;
+  ticks[name] = ticks[name] || {};
+  if (cb.checked) ticks[name][r.key] = true; else delete ticks[name][r.key];
   cb.closest(".row").classList.toggle("done", cb.checked);
-  if (cb.checked && key === openKey) closeDemo();
-  store.set("hrs-ticks3", ticks);
+  if (cb.checked && id === openKey) closeDemo();
+  saveTicks();
   refreshProgress();
 });
 $("clear").addEventListener("click", e => {
   const b = e.currentTarget;
+  if (!program) return;
   if (!b.classList.contains("armed")) {
     b.classList.add("armed");
     b.textContent = "Confirm reset";
     armTimer = setTimeout(disarmClear, 3000);
     return;
   }
-  for (const k in ticks) if (k.startsWith(`${tab}-`)) delete ticks[k];
-  store.set("hrs-ticks3", ticks);
+  delete ticks[session().name];
+  saveTicks();
   renderSession();
 });
-renderSession();
+load();
 </script>
 
 </html>
