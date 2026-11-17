@@ -7,34 +7,34 @@
 # Type plain hyphens: "3-4" shows as "3–4".
 
 title: Workout App
-heading: Strength program
+heading: "Strength program - Nov '26"
 
 # Exercises used in more than one session. List them by name below.
 shared:
   Banded mountain climber:
-    sets: 2
-    reps: 6
+    sets: 3
+    reps: 9
     unit: per side
     demo: ly-climber.mp4
   Side plank + leg raise:
-    sets: 2
-    reps: 6-8
+    sets: 3
+    reps: 8
     unit: per side
     cue: On forearm
     demo: ly-side-plank.mp4
   Bird dog:
-    sets: 2
-    reps: 6
+    sets: 3
+    reps: 8
     unit: per side
     cue: 5 s hold
     demo: ly-bird-dog.mp4
   Banded knee drive:
-    sets: 2
+    sets: 3
     reps: 8
     unit: per side
     demo: ly-hip-flexion.mp4
   Lateral band walk:
-    sets: 2
+    sets: 3
     reps: 10
     unit: each way
     cue: Band above knees
@@ -119,12 +119,12 @@ sessions:
         demo: ly-leg-curl.mp4
       - name: Ring fallout
         sets: 2
-        reps: 6-8
+        reps: 8
         cue: "Later: ab-wheel rollout 3×6–10"
         demo: ly-fallout.mp4
       - name: Suitcase carry
         sets: 2
-        time: 30-40 s
+        time: 60 s
         unit: per side
         demo: ly-suitcase.mp4
       - name: Band tibialis raise
@@ -169,12 +169,12 @@ sessions:
         cue: Straps
         demo: ly-row.mp4
       - name: Face pull
-        sets: 2-3
+        sets: 3
         reps: 12-20
         demo: ly-face-pull.mp4
       - name: Neck isometrics
         sets: 3
-        time: 20 s
+        time: 30 s
         unit: each way
         demo: neck.jpg
 
@@ -201,12 +201,12 @@ sessions:
         unit: per leg
         demo: ly-bss.mp4
       - name: Back extension
-        sets: 2
+        sets: 3
         reps: 10-15
         cue: Top half of the range at first, soft knees, stop at a straight line
         demo: ly-back-ext.mp4
       - name: Weighted hip flexion
-        sets: 2
+        sets: 3
         reps: 8-12
         unit: per leg
         cue: EZ Boot, knee bent
@@ -217,7 +217,7 @@ sessions:
         unit: per side
         demo: ly-copenhagen.webp
       - name: KB pick-up
-        sets: 2-3
-        time: 60 s
-        cue: Last. Nonstop, alternate sides; stop if form slips
+        sets: 2
+        time: 60+ s
+        cue: Nonstop, alternate sides; stop if form slips
         demo: kb-crossover.mp4
